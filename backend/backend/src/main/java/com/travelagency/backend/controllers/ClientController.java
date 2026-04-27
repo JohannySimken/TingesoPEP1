@@ -3,7 +3,6 @@ package com.travelagency.backend.controllers;
 import com.travelagency.backend.entities.ClientEntity;
 import com.travelagency.backend.services.ClientService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
