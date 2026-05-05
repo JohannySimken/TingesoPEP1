@@ -1,0 +1,48 @@
+package com.travelagency.backend.controllers;
+
+import com.travelagency.backend.entities.UserEntity;
+import com.travelagency.backend.services.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/users")
+@RequiredArgsConstructor
+public class UserController {
+    private final UserService userService;
+
+    @PostMapping(value = "/register")
+    public ResponseEntity<UserEntity> register(@RequestBody UserEntity user){
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.register(user));
+    }
+
+    @PostMapping(value = "/login")
+    public ResponseEntity<UserEntity> login(@RequestBody UserEntity user){
+        return ResponseEntity.ok(userService.login(user.getEmail(), user.getPassword()));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserEntity> findById(@PathVariable Long id){
+        return ResponseEntity.ok(userService.findById(id));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<UserEntity>> findAll(){
+        return ResponseEntity.ok(userService.findAll());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserEntity> update(@PathVariable Long id, @RequestBody UserEntity userUpdated){
+        return ResponseEntity.ok(userService.update(id, userUpdated));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deactivate(@PathVariable Long id){
+        userService.deactivateUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
+}

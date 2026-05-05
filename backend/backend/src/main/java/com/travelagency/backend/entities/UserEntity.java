@@ -7,12 +7,12 @@ import java.time.LocalDateTime;
 
 
 @Entity
-@Table(name = "clients")
+@Table(name = "users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ClientEntity {
+public class UserEntity {
     public enum Role {CLIENT, ADMIN    }
     public enum Status {ACTIVE, INACTIVE
 
