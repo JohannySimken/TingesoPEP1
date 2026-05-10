@@ -9,6 +9,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UserService {
+
     private static final int MAX_FAILED_LOGIN_ATTEMPTS = 3;
     private final UserRepository userRepository;
 
@@ -47,12 +48,11 @@ public class UserService {
     public List<UserEntity> findAll(){
         return userRepository.findAll();
     }
+
     public UserEntity findById(Long id){
         return userRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     }
-    public UserEntity findByEmail(String email){
-        return userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-    }
+
     public UserEntity update(Long id, UserEntity userUpdated){
         UserEntity userEntity = findById(id);
         if(userUpdated.getName() != null) userEntity.setName(userUpdated.getName());

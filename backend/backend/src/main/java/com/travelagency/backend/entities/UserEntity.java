@@ -13,14 +13,16 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class UserEntity {
-    public enum Role {CLIENT, ADMIN    }
-    public enum Status {ACTIVE, INACTIVE
+    public enum Role { CLIENT, ADMIN }
+    public enum Status {ACTIVE, INACTIVE }
 
-    }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(unique = true, nullable = false)
     private Long id;
+
+    @Column(unique = true)
+    private String keycloakId;
 
     @Column(nullable = false)
     private String name;
@@ -32,8 +34,8 @@ public class UserEntity {
     private String password;
 
     private String phone;
-    private String nationality;
     private String identityDocument;
+    private String nationality;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -52,8 +54,8 @@ public class UserEntity {
     @PrePersist
     protected void onCreate (){
         this.createdAt = LocalDateTime.now();
-        if (this.role == null) {this.role = Role.CLIENT;}
         if (this.status == null) {this.status = Status.ACTIVE;}
+        if (this.role == null) {this.role = Role.CLIENT;}
         if (this.failedLoginAttempts == null) {this.failedLoginAttempts = 0;}
     }
 

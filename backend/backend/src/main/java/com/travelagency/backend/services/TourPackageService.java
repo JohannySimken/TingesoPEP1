@@ -4,7 +4,6 @@ import com.travelagency.backend.entities.TourPackageEntity;
 import com.travelagency.backend.repositories.TourPackageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.math.BigDecimal;
@@ -15,6 +14,7 @@ public class TourPackageService {
     private final TourPackageRepository tourPackageRepository;
 
     public TourPackageEntity createPackage(TourPackageEntity tourPackage){
+        validateAvailability(tourPackage);
         tourPackage.setAvailableSlots(tourPackage.getAvailableSlots());
         tourPackage.setStatus(TourPackageEntity.Status.AVAILABLE);
         tourPackage.setDuration((int)(tourPackage.getEndDate().toEpochDay() - tourPackage.getStartDate().toEpochDay()));
@@ -72,7 +72,7 @@ public class TourPackageService {
     public void releaseSlots(Long id, int slots){
         TourPackageEntity pkg = findById(id);
         pkg.setAvailableSlots(pkg.getAvailableSlots() + slots);
-        if(pkg.getAvailableSlots() > 0) pkg.setStatus(TourPackageEntity.Status.AVAILABLE);
+        if (pkg.getStatus() == TourPackageEntity.Status.SOLD_OUT) pkg.setStatus(TourPackageEntity.Status.SOLD_OUT);
         tourPackageRepository.save(pkg);
     }
 

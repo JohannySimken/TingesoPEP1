@@ -13,7 +13,7 @@ public interface PromotionRepository extends JpaRepository<PromotionEntity, Long
 
     @Query("""
         SELECT p FROM PromotionEntity p
-        WHERE p.isActive = true
+        WHERE p.active = true
           AND p.startDate <= :date
           AND p.endDate >= :date
     """)

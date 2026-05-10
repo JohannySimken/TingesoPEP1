@@ -1,5 +1,6 @@
 package com.travelagency.backend.controllers;
 
+import com.travelagency.backend.repositories.UserRepository;
 import com.travelagency.backend.entities.UserEntity;
 import com.travelagency.backend.services.UserService;
 import lombok.RequiredArgsConstructor;
@@ -7,12 +8,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final UserRepository userRepository;
 
     @PostMapping(value = "/register")
     public ResponseEntity<UserEntity> register(@RequestBody UserEntity user){
@@ -43,6 +46,28 @@ public class UserController {
     public ResponseEntity<Void> deactivate(@PathVariable Long id){
         userService.deactivateUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/sync")
+    public ResponseEntity<?> syncUser(@RequestBody Map<String, String> userData) {
+        String keycloakId = userData.get("keycloakId");
+        String email = userData.get("email");
+        String name = userData.get("name");
+
+        UserEntity user = userRepository.findByKeycloakId(keycloakId)
+                .orElseGet(() -> userRepository.findByEmail(email)
+                        .orElse(UserEntity.builder()
+                                .email(email)
+                                .name(name)
+                                .password("KEYCLOAK")
+                                .role(UserEntity.Role.CLIENT)
+                                .status(UserEntity.Status.ACTIVE)
+                                .build()));
+
+        user.setKeycloakId(keycloakId);
+        user.setName(name);
+        userRepository.save(user);
+        return ResponseEntity.ok(user);
     }
 
 }

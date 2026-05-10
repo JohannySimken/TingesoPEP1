@@ -11,7 +11,7 @@ import java.util.List;
 import java.time.LocalDate;
 
 @RestController
-@RequestMapping("/api/tour-packages")
+@RequestMapping("/api/packages")
 @RequiredArgsConstructor
 public class TourPackageController {
     private final TourPackageService tourPackageService;

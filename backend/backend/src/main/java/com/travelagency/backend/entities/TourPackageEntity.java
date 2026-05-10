@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalTime;
+
 
 @Entity
 @Table(name = "tour_packages")
@@ -66,9 +66,12 @@ public class TourPackageEntity {
 
     @PrePersist
     protected void onCreate (){
-        if (this.status == null) this.status = Status.AVAILABLE;
-        if (this.duration == null && startDate != null && endDate != null) {
-            this.duration = (int) (endDate.toEpochDay() - startDate.toEpochDay());
+        if(this.status == null) this.status = Status.AVAILABLE;
+
+        if (this.availableSlots == null) this.availableSlots = this.totalSlots;
+
+        if(this.duration == null & startDate != null && endDate != null){
+            this.duration = (int)(endDate.toEpochDay() - startDate.toEpochDay());
         }
 
     }

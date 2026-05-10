@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 @Entity
@@ -31,6 +32,13 @@ public class PromotionEntity {
     @Column(nullable = false)
     private LocalDate endDate;
 
+    @JsonProperty("active")
     @Builder.Default
-    private Boolean isActive = true;
+    @Column(name = "is_active")
+    private Boolean active = true;
+
+    @PrePersist
+    protected void onCreate (){
+        if(this.active == null) this.active = true;
+    }
 }
