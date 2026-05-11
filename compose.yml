@@ -38,18 +38,16 @@ services:
     networks:
       - travelagency-net
 
-  backend:
-    image: wolfhix/travelagency-backend:latest
-    container_name: travelagency-backend
-    environment:
+  backend1:
+    build:
+      context: ./backend
+    environment: &backend-env
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/travelagency_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: "2274"
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8080/realms/travel-agency
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/travel-agency/protocol/openid-connect/certs
-    ports:
-      - "8090:8090"
     depends_on:
       postgres:
         condition: service_healthy
@@ -58,13 +56,80 @@ services:
     networks:
       - travelagency-net
 
-  frontend:
-    image: wolfhix/travelagency-frontend:latest
-    container_name: travelagency-frontend
-    ports:
-      - "80:80"
+  backend2:
+    build:
+      context: ./backend
+    environment: *backend-env
     depends_on:
-      - backend
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    networks:
+      - travelagency-net
+
+  backend3:
+    build:
+      context: ./backend
+    environment: *backend-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    networks:
+      - travelagency-net
+
+  backend-lb:
+    image: nginx:alpine
+    container_name: travelagency-backend-lb
+    volumes:
+      - ./nginx-backend.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend1
+      - backend2
+      - backend3
+    networks:
+      - travelagency-net
+
+  frontend1:
+    build:
+      context: ./frontend
+    container_name: travelagency-frontend1
+    depends_on:
+      - backend-lb
+    networks:
+      - travelagency-net
+
+  frontend2:
+    build:
+      context: ./frontend
+    container_name: travelagency-frontend2
+    depends_on:
+      - backend-lb
+    networks:
+      - travelagency-net
+
+  frontend3:
+    build:
+      context: ./frontend
+    container_name: travelagency-frontend3
+    depends_on:
+      - backend-lb
+    networks:
+      - travelagency-net
+
+  frontend-lb:
+    image: nginx:alpine
+    container_name: travelagency-frontend-lb
+    volumes:
+      - ./nginx-frontend.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend1
+      - frontend2
+      - frontend3
+    ports:
+      - "8070:80"
     networks:
       - travelagency-net
 
