@@ -10,25 +10,28 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (keycloak.authenticated) {
       const profile = keycloak.tokenParsed;
+      console.log("🔑 ROLES EN TOKEN:", profile.realm_access);
+      const keycloakRoles = profile.realm_access?.roles || [];
       api
         .post("/users/sync", {
           keycloakId: profile.sub,
           email: profile.email,
           name: profile.name || profile.preferred_username,
+          roles: keycloakRoles,
         })
         .then(({ data }) => {
-          console.log("✅ Sync response:", data); // ← agrega esto
+          console.log("✅ Sync response:", data);
           setUser({
             id: data.id,
             keycloakId: profile.sub,
             name: data.name,
             email: data.email,
-            roles: profile.realm_access?.roles || [],
-            role: data.role,
+            roles: data.role,
+            role: keycloakRoles,
           });
         })
         .catch((err) => {
-          console.error("❌ Sync error:", err.response?.data); // ← y esto
+          console.error("❌ Sync error:", err.response?.data);
         })
         .finally(() => setLoading(false));
     } else {
@@ -36,12 +39,13 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const login = () => {
-    keycloak.login();
-  };
+  const login = () =>
+    keycloak.login({
+      redirectUri: window.location.origin,
+    });
 
   const logout = () => {
-    keycloak.logout({ redirectUri: "http://localhost:5173/" });
+    keycloak.logout({ redirectUri: `${window.location.origin}/` });
   };
 
   const getToken = () => {
@@ -49,10 +53,14 @@ export function AuthProvider({ children }) {
   };
 
   const hasRole = (role) => {
+    const withPrefix = role.startsWith("ROLE_") ? role : "ROLE_" + role;
+    const withoutPrefix = role.replace("ROLE_", "");
+
     return (
-      user?.roles.includes(role) ||
-      user?.roles.includes(role.replace("ROLE_", "")) ||
-      user?.role === role.replace("ROLE_", "")
+      keycloak.hasRealmRole(withPrefix) ||
+      keycloak.hasRealmRole(withoutPrefix) ||
+      user?.roles?.includes(withPrefix) ||
+      user?.role === withoutPrefix
     );
   };
 
