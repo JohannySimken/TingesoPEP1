@@ -10,26 +10,27 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init2-db.sql
     networks:
       - travelagency-net
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
       timeout: 5s
       retries: 5
 
   keycloak:
     image: quay.io/keycloak/keycloak:24.0
     container_name: travelagency-keycloak
-    command: start-dev
+    command: start-dev --import-realm 
     environment:
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_URL: jdbc:postgresql://postgres:5432/travelagency_db
       KC_DB_USERNAME: postgres
       KC_DB_PASSWORD: "2274"
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
+    volumes:
+      - ./travel-agency-realm.json:/opt/keycloak/data/import/travel-agency-realm.json:ro
     ports:
       - "8080:8080"
     depends_on:
@@ -39,8 +40,7 @@ services:
       - travelagency-net
 
   backend1:
-    build:
-      context: ./backend
+    image: wolfhix/travelagency-backend:latest
     environment: &backend-env
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/travelagency_db
       SPRING_DATASOURCE_USERNAME: postgres
@@ -57,8 +57,7 @@ services:
       - travelagency-net
 
   backend2:
-    build:
-      context: ./backend
+    image: wolfhix/travelagency-backend:latest
     environment: *backend-env
     depends_on:
       postgres:
@@ -69,8 +68,7 @@ services:
       - travelagency-net
 
   backend3:
-    build:
-      context: ./backend
+    image: wolfhix/travelagency-backend:latest
     environment: *backend-env
     depends_on:
       postgres:
@@ -93,8 +91,7 @@ services:
       - travelagency-net
 
   frontend1:
-    build:
-      context: ./frontend
+    image: wolfhix/travelagency-frontend:latest
     container_name: travelagency-frontend1
     depends_on:
       - backend-lb
@@ -102,8 +99,7 @@ services:
       - travelagency-net
 
   frontend2:
-    build:
-      context: ./frontend
+    image: wolfhix/travelagency-frontend:latest
     container_name: travelagency-frontend2
     depends_on:
       - backend-lb
@@ -111,8 +107,7 @@ services:
       - travelagency-net
 
   frontend3:
-    build:
-      context: ./frontend
+    image: wolfhix/travelagency-frontend:latest
     container_name: travelagency-frontend3
     depends_on:
       - backend-lb
