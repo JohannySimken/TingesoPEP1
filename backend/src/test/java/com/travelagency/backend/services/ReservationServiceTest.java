@@ -42,7 +42,6 @@ class ReservationServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Inyectar @Value fields
         ReflectionTestUtils.setField(reservationService, "expiryHours", 24);
         ReflectionTestUtils.setField(reservationService, "groupThreshold", 4);
         ReflectionTestUtils.setField(
